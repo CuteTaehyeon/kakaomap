@@ -3,47 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>미세먼지로부터 세계 구하기 (Zelda Style)</title>
+    <title>Zelda: Eco-Explorer of Hyrule</title>
     <style>
-        /* 1. 젤다 스타일 테마 및 기본 리셋 */
+        /* 1. 젤다의 전설 테마 인터페이스 리셋 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none; /* 게임 클릭 시 텍스트 블록 방지 */
+            user-select: none;
         }
 
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #050b14;
-            font-family: 'Malgun Gothic', dotum, sans-serif;
-            color: #e0f7fa;
+            background-color: #030708;
+            font-family: 'Malgun Gothic', sans-serif;
+            color: #cfebef;
         }
 
-        /* 2. 레이아웃 분할 및 반응형 UI */
+        /* 2. 레이아웃 시스템 */
         .container {
             display: flex;
             width: 100%;
             height: 100%;
         }
 
-        /* 왼쪽 사이드바 (정보 패널) */
+        /* 젤다 스타일 고풍스럽고 정교한 사이드바 */
         .sidebar {
             width: 380px;
             height: 100%;
-            background: linear-gradient(135deg, #050b14 0%, #0d1b2a 100%);
-            border-right: 3px solid #00e5ff;
-            padding: 20px;
+            background: linear-gradient(180deg, #061014 0%, #020608 100%);
+            border-right: 4px double #00e5ff;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
             z-index: 10;
             flex-shrink: 0;
-            box-shadow: 5px 0 25px rgba(0, 229, 255, 0.2);
+            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.8);
         }
 
-        /* 오른쪽 메인 영역 (지도 & 로드뷰 화면) */
         .main-content {
             flex: 1;
             height: 100%;
@@ -52,223 +51,195 @@
 
         .map-area, .roadview-area {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.5s ease, z-index 0s;
+            top: 0; left: 0; width: 100%; height: 100%;
+            transition: opacity 0.4s ease;
         }
-
         .map-area { z-index: 2; opacity: 1; }
         .roadview-area { z-index: 1; opacity: 0; }
 
-        /* 전투 모드 활성화 시 클래스 조작 */
         .battle-active .map-area { z-index: 1; opacity: 0; }
         .battle-active .roadview-area { z-index: 2; opacity: 1; }
 
-        /* 3. 젤다 스타일 HUD 및 UI 요소 */
+        /* 3. 젤다 고유 HUD 시스템 */
         .game-header {
-            border-bottom: 2px dashed #00e5ff;
-            padding-bottom: 15px;
+            border-bottom: 2px solid #00e5ff;
+            padding-bottom: 12px;
             margin-bottom: 20px;
+            text-align: center;
         }
-
         .title-sub {
             font-size: 11px;
             color: #00e5ff;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            letter-spacing: 3px;
         }
-
         .title-main {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             color: #fff;
-            text-shadow: 0 0 10px rgba(0,229,255,0.6);
+            text-shadow: 0 0 8px rgba(0,229,255,0.8);
             margin-top: 5px;
         }
 
-        /* 루피 카운터 */
+        /* 🔷 루피 인벤토리 UI */
         .rupee-hud {
             display: flex;
             align-items: center;
-            font-size: 24px;
+            justify-content: center;
+            font-size: 26px;
             font-weight: bold;
-            color: #39ff14; /* 형광 그린 */
-            text-shadow: 0 0 8px rgba(57,255,20,0.5);
-            margin-bottom: 15px;
+            color: #39ff14;
+            text-shadow: 0 0 10px rgba(57,255,20,0.6);
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px dashed rgba(0,229,255,0.3);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
         }
-        .rupee-icon { margin-right: 8px; font-size: 28px; }
+        .rupee-icon { margin-right: 10px; }
 
-        /* 검색창 */
+        /* 🗺️ 탐색 검색창 */
         .search-box {
             display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 6px;
+            margin-bottom: 15px;
         }
         .search-box input {
             flex: 1;
             padding: 12px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid #00e5ff;
             border-radius: 4px;
             color: #fff;
-            font-size: 14px;
         }
-        .search-box input:focus { outline: none; box-shadow: 0 0 8px #00e5ff; }
         .search-box button {
-            padding: 0 15px;
+            padding: 0 18px;
             background: #00e5ff;
-            border: none;
-            border-radius: 4px;
             color: #000;
+            border: none;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            border-radius: 4px;
         }
-        .search-box button:hover { background: #fff; box-shadow: 0 0 12px #fff; }
+        .search-box button:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* 검색 리스트 */
+        /* 지역 리스트 */
         .result-list {
             flex: 1;
             overflow-y: auto;
             list-style: none;
         }
         .result-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            padding: 15px;
-            margin-bottom: 10px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            padding: 12px;
+            margin-bottom: 8px;
             border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         .result-item:hover {
-            background: rgba(0, 229, 255, 0.1);
+            background: rgba(0, 229, 255, 0.08);
             border-color: #00e5ff;
-            transform: translateX(5px);
+            transform: translateX(4px);
         }
 
-        /* 4. 전투 진행용 대형 HUD (사이드바 내부 위치) */
+        /* ⚔️ 보스 체력바 및 전투 패널 */
         .battle-hud {
             display: none;
-            background: rgba(255, 0, 60, 0.05);
+            background: rgba(255, 0, 60, 0.03);
             border: 1px solid #ff003c;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 6px;
             margin-top: auto;
-            box-shadow: inset 0 0 15px rgba(255,0,60,0.2);
+            box-shadow: 0 0 15px rgba(255,0,60,0.1);
         }
-        .danger-ui {
+        .danger-title {
             color: #ff003c;
             font-weight: bold;
             text-align: center;
-            animation: blink 1s infinite alternate;
-            font-size: 14px;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
+            font-size: 13px;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            animation: pulse 1s infinite alternate;
         }
-        .target-name { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 5px; }
-        .target-info { font-size: 13px; color: #ff80ab; margin-bottom: 10px; }
+        .monster-name-tag { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 8px; text-align: center;}
         
-        /* 젤다 스타일 체력바 */
-        .hp-container { width: 100%; height: 16px; background: #220008; border: 1px solid #ff003c; border-radius: 8px; overflow: hidden; position: relative; }
-        .hp-bar { width: 100%; height: 100%; background: linear-gradient(90deg, #ff003c, #ff5252); transition: width 0.2s ease; }
-
-        /* 도망치기 버튼 */
+        /* 젤다 스타일 하트/에너지 보스 피통 */
+        .hp-outer { width: 100%; height: 14px; background: #1a0005; border: 1px solid #ff003c; border-radius: 7px; overflow: hidden; }
+        .hp-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #ff003c 0%, #ff6b8b 100%); transition: width 0.15s ease; }
+        
         .btn-escape {
-            width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: 1px solid #fff;
-            color: #fff; cursor: pointer; font-weight: bold; transition: all 0.3s;
+            width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.4);
+            color: #ccc; cursor: pointer; border-radius: 4px;
         }
-        .btn-escape:hover { background: #fff; color: #000; }
+        .btn-escape:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        /* 5. 로드뷰 내부 몬스터 커스텀 오버레이 디자인 */
+        /* 4. 로드뷰 내 크리티컬 히트 존 (몬스터 오버레이) */
         .monster-overlay {
-            position: relative;
-            width: 320px;
-            height: 320px;
+            position: absolute;
+            width: 300px;
+            height: 300px;
             display: flex;
             justify-content: center;
             align-items: center;
-            transform: translate(-50%, -50%); /* 중심 정렬 */
-        }
-        
-        /* [조건 5] 애니메이션 및 필터 효과 장착한 몬스터 비주얼 */
-        .monster-img {
-            width: 260px;
-            height: auto;
             cursor: pointer;
-            filter: drop-shadow(0 25px 15px rgba(0, 0, 0, 0.7));
-            animation: float 3s ease-in-out infinite;
-            transition: transform 0.1s, filter 0.3s;
         }
-        .monster-img:hover {
-            transform: scale(1.08);
-            filter: drop-shadow(0 0 20px rgba(255,0,60,0.8)) brightness(1.2);
+        .monster-img {
+            width: 250px;
+            height: auto;
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.8));
+            animation: floatGlow 2.5s ease-in-out infinite;
+            transition: transform 0.05s;
         }
-        .monster-img:active { transform: scale(0.95); }
+        .monster-img:active { transform: scale(0.9); }
 
-        /* 6. 데미지 팝업 텍스트 효과 */
-        .damage-text {
+        /* 💥 데미지 팝업 이펙트 */
+        .damage-pop {
             position: absolute;
-            font-size: 38px;
+            font-size: 42px;
             font-weight: 900;
             color: #ffeb3b;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 15px #ff0000;
-            animation: damagePop 0.6s ease-out forwards;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            animation: popUp 0.5s ease-out forwards;
             pointer-events: none;
-            z-index: 999;
+            z-index: 9999;
         }
 
-        /* 7. 결과 모달창 시스템 (지리 정보 카드) */
+        /* 5. 지리 정보 고대 카드 모달 */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 11, 20, 0.85);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            justify-content: center; align-items: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center;
         }
-        .card {
-            background: linear-gradient(180deg, #0d1b2a 0%, #050b14 100%);
-            border: 3px solid #00e5ff;
-            box-shadow: 0 0 35px rgba(0, 229, 255, 0.4);
-            width: 420px;
-            padding: 30px;
-            border-radius: 8px;
-            text-align: center;
-            transform: scale(0.8); opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .ancient-card {
+            background: #061014; border: 2px solid #00e5ff; border-radius: 8px;
+            width: 400px; padding: 25px; text-align: center;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+            transform: scale(0.8); opacity: 0; transition: all 0.3s ease;
         }
-        .modal.open .card { transform: scale(1); opacity: 1; }
-        .card-header { font-size: 24px; font-weight: bold; color: #00e5ff; margin-bottom: 15px; }
-        .card-body { text-align: left; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.1); margin-bottom: 20px; line-height: 1.6; }
-        .card-body p { margin-bottom: 8px; }
-        .btn-close-card { padding: 12px 30px; background: #39ff14; color: #000; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        .btn-close-card:hover { background: #fff; box-shadow: 0 0 15px #39ff14; }
+        .modal.active .ancient-card { transform: scale(1); opacity: 1; }
+        .card-title { font-size: 22px; color: #00e5ff; margin-bottom: 15px; font-weight: bold; }
+        .card-info { background: rgba(255,255,255,0.02); border: 1px solid rgba(0,229,255,0.2); padding: 15px; border-radius: 4px; text-align: left; line-height: 1.6; margin-bottom: 20px;}
+        .btn-claim { width: 100%; padding: 12px; background: #39ff14; color: #000; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;}
 
-        /* 8. 애니메이션 모음 키프레임 */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+        /* 키프레임 애니메이션 */
+        @keyframes floatGlow {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.03); }
+            100% { transform: translateY(0) scale(1); }
         }
-        @keyframes blink {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
+        @keyframes popUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.6); }
+            100% { opacity: 0; transform: translateY(-70px) scale(1.2); }
         }
-        @keyframes damagePop {
-            0% { opacity: 1; transform: translateY(0) scale(0.5); }
-            50% { transform: translateY(-50px) scale(1.2); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        @keyframes pulse {
+            0% { opacity: 0.4; text-shadow: 0 0 2px red; }
+            100% { opacity: 1; text-shadow: 0 0 10px red; }
         }
 
-        /* 모바일 대응 미디어쿼리 */
         @media (max-width: 768px) {
             .container { flex-direction: column-reverse; }
-            .sidebar { width: 100%; height: 40%; border-right: none; border-top: 3px solid #00e5ff; }
-            .main-content { flex: 1; height: 60%; }
+            .sidebar { width: 100%; height: 45%; border-right: none; border-top: 4px double #00e5ff; }
+            .main-content { flex: 1; height: 55%; }
         }
     </style>
 </head>
@@ -277,31 +248,31 @@
     <div id="gameContainer" class="container">
         <div class="sidebar">
             <div class="game-header">
-                <div class="title-sub">Hyrule Eco-Guardian</div>
-                <div class="title-main">미세먼지 격퇴 작전</div>
+                <div class="title-sub">THE LEGEND OF GEOGRAPHY</div>
+                <div class="title-main">하이랄 지리 조사단</div>
             </div>
 
             <div class="rupee-hud">
                 <span class="rupee-icon">🔷</span>
-                <span id="rupeeCount">0</span> <span style="font-size:14px; margin-left:5px; color:#aaa;">RUPEES</span>
+                <span id="totalRupees">0</span>
             </div>
 
             <div class="search-box">
-                <input type="text" id="keyword" placeholder="오염 구역 탐색 (예: 종로구)">
-                <button onclick="searchPlaces()">탐색</button>
+                <input type="text" id="targetKeyword" placeholder="조사할 지명 입력 (예: 해운대)">
+                <button onclick="searchNewRegion()">조사</button>
             </div>
 
-            <ul id="resultList" class="result-list">
-                </ul>
+            <ul id="regionList" class="result-list">
+                <li style="color:#666; text-align:center; padding-top:30px;">지역을 검색하여 몬스터를 스캔하세요.</li>
+            </ul>
 
             <div id="battleHud" class="battle-hud">
-                <div class="danger-ui">⚠️ DANGER: 오염 생명체 조우</div>
-                <div id="targetName" class="target-name">보코블린</div>
-                <div id="targetInfo" class="target-info">PM2.5: 65㎍/㎥ (서울 중구)</div>
-                <div class="hp-container">
-                    <div id="hpBar" class="hp-bar"></div>
+                <div class="danger-ui danger-title">⚔️ ENEMY ENCOUNTERED ⚔️</div>
+                <div id="activeMonsterName" class="monster-name-tag">-</div>
+                <div class="hp-outer">
+                    <div id="monsterHp" class="hp-inner"></div>
                 </div>
-                <button class="btn-escape" onclick="exitBattleMode()">전투 이탈</button>
+                <button class="btn-escape" onclick="escapeBattle()">전투 도망치기</button>
             </div>
         </div>
 
@@ -311,265 +282,248 @@
         </div>
     </div>
 
-    <div id="cardModal" class="modal">
-        <div class="card">
-            <div id="cardHeader" class="card-header">📍 지리 정보 카드 해금</div>
-            <div id="cardBody" class="card-body">
-                </div>
-            <button class="btn-close-card" onclick="closeCardModal()">카드 수령 완료</button>
+    <div id="rewardModal" class="modal">
+        <div class="ancient-card">
+            <div id="modalRegionName" class="card-title">📍 서울 종로구</div>
+            <div id="modalRegionText" class="card-info">지리 정보 로딩 실패</div>
+            <button class="btn-claim" onclick="claimRewards()">루피 및 도감 획득</button>
         </div>
     </div>
 
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=5fadde5e88e43357b899abb7558e6206&libraries=services&autoload=false"></script>
     <script>
-        // 전역 게임 변수 제어
         let map, rv, rvClient, ps;
-        let currentMonster = null;
-        let userRupees = 0;
+        let currentBattle = null;
+        let totalRupees = 0;
+        let currentMarkers = [];
 
-        // [조건 2] 환경 데이터 기반 기획 몬스터 셋업 (하드코딩 데이터 보강)
-        const monsterData = [
-            { name: "보코블린", type: "bokoblin", lat: 37.5665, lng: 126.9780, dust: 65, reward: 50, maxHp: 100, hp: 100, region: "서울 중구", info: "행정·정치 중심 지역으로 교통량이 매우 조밀합니다. 도심 밀집 효과와 자동차 배출가스로 인해 미세먼지 수치가 상승합니다." },
-            { name: "가디언", type: "guardian", lat: 37.5700, lng: 126.9820, dust: 120, reward: 150, maxHp: 250, hp: 250, region: "서울 종로구", info: "고궁과 빌딩 인프라가 결합된 상업 중심지입니다. 분지형 구조 특성과 외부 유입 오염물질 정체현상으로 인해 초미세먼지가 매우 높게 측정됩니다." },
-            { name: "보코블린", type: "bokoblin", lat: 37.5445, lng: 127.0560, dust: 45, reward: 50, maxHp: 100, hp: 100, region: "성수동 팝업거리", info: "준공업지역 공장 설비와 최근 급증한 유동인구 팝업스토어 건설로 미세먼지 국소 차폐현상이 일어나는 지역입니다." }
-        ];
-
-        // 초기 시스템 초기화 및 비동기 동기화 보호
+        // 시스템 기동 및 보호 로드
         kakao.maps.load(function() {
-            // 지도 초기화
-            const mapContainer = document.getElementById('map');
-            const defaultPos = new kakao.maps.LatLng(37.566826, 126.9786567);
-            map = new kakao.maps.Map(mapContainer, { center: defaultPos, level: 5 });
-            
-            // 검색 엔진 및 로드뷰 모듈 클라이언트 구축
+            map = new kakao.maps.Map(document.getElementById('map'), {
+                center: new kakao.maps.LatLng(37.566826, 126.9786567),
+                level: 4
+            });
+
             ps = new kakao.maps.services.Places();
-            const rvContainer = document.getElementById('roadview');
-            rv = new kakao.maps.Roadview(rvContainer);
+            rv = new kakao.maps.Roadview(document.getElementById('roadview'));
             rvClient = new kakao.maps.RoadviewClient();
 
-            // 유저 연동 및 몬스터 필터링 배치 작동
-            getGeolocation();
-            spawnMonstersOnMap();
-        });
-
-        // 1. 위치 연동 기능
-        function getGeolocation() {
+            // 최초 GPS 수신 동기화
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(pos) {
-                    const loc = new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-                    map.setCenter(loc);
+                    map.setCenter(new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
                 });
             }
-        }
+        });
 
-        // 2. 검색 및 탐색창 구축
-        function searchPlaces() {
-            const kw = document.getElementById('keyword').value;
-            if (!kw.trim()) return alert('탐색 키워드를 입력해 주세요.');
+        // 1. [핵심 변경] 모든 검색 지역에 100% 몬스터 실시간 매핑 알고리즘
+        function searchNewRegion() {
+            const kw = document.getElementById('targetKeyword').value;
+            if (!kw.trim()) return;
+
             ps.keywordSearch(kw, function(data, status) {
                 if (status === kakao.maps.services.Status.OK) {
-                    displaySearchResults(data);
+                    generateRegionMonsters(data);
                 } else {
-                    alert('오염 탐색 구역을 찾을 수 없습니다.');
+                    alert('해당 지형은 스캔할 수 없습니다.');
                 }
             });
         }
 
-        function displaySearchResults(places) {
-            const list = document.getElementById('resultList');
+        function generateRegionMonsters(places) {
+            const list = document.getElementById('regionList');
             const bounds = new kakao.maps.LatLngBounds();
+            
+            // 기존 마커 전체 클리어
+            currentMarkers.forEach(m => m.setMap(null));
+            currentMarkers = [];
             list.innerHTML = '';
 
-            places.slice(0, 5).forEach(place => {
+            places.slice(0, 6).forEach((place, idx) => {
                 const pos = new kakao.maps.LatLng(place.y, place.x);
                 bounds.extend(pos);
 
+                // 보코블린 / 가디언 무작위 매칭 엔진
+                const isBoss = idx % 3 === 0; 
+                const monster = {
+                    name: isBoss ? "고대 가디언" : "야생 보코블린",
+                    type: isBoss ? "guardian" : "bokoblin",
+                    maxHp: isBoss ? 240 : 100,
+                    hp: isBoss ? 240 : 100,
+                    reward: isBoss ? 150 : 60,
+                    placeName: place.place_name,
+                    address: place.road_address_name || place.address_name,
+                    lat: place.y,
+                    lng: place.x
+                };
+
+                // 지도에 젤다 고유 아이콘 핀 배치
+                const markerEl = document.createElement('div');
+                markerEl.style.cssText = 'font-size:32px; cursor:pointer; filter:drop-shadow(0 0 6px red);';
+                markerEl.innerHTML = isBoss ? '👁️' : '👹';
+
+                const overlay = new kakao.maps.CustomOverlay({
+                    position: pos,
+                    content: markerEl,
+                    map: map
+                });
+                currentMarkers.push(overlay);
+
+                // 사이드바 목록 노드 생성
                 const li = document.createElement('li');
                 li.className = 'result-item';
-                li.innerHTML = `<strong>🔮 ${place.place_name}</strong><br><span style="font-size:12px;color:#aaa;">탐색 스캔 좌표 설정</span>`;
-                li.onclick = () => map.setCenter(pos);
+                li.innerHTML = `<strong>${monster.name} 출현</strong><br><span style="font-size:11px;color:#00e5ff;">📍 ${place.place_name}</span>`;
+                
+                // 마커 및 리스트 클릭 연동 -> 로드뷰 격투 돌입
+                const startAction = () => initBattleMode(monster);
+                markerEl.onclick = startAction;
+                li.onclick = startAction;
+
                 list.appendChild(li);
             });
+
             map.setBounds(bounds);
         }
 
-        // 3. 지도 위에 몬스터 마커 소환 (미세먼지 가이드 검증)
-        function spawnMonstersOnMap() {
-            monsterData.forEach((monster, index) => {
-                if (monster.dust <= 30) return; // PM2.5 0~30은 평화 구역
+        // 2. [완벽 해결] 로드뷰 내부 방향 정렬(POV) 매커니즘 장착 보스전 진입
+        function initBattleMode(monster) {
+            currentBattle = monster;
+            const targetPos = new kakao.maps.LatLng(monster.lat, monster.lng);
 
-                const pos = new kakao.maps.LatLng(monster.lat, monster.lng);
-                
-                // 마커 커스텀화 (젤다 스타일 유니크 이모지 설계)
-                const markerContent = document.createElement('div');
-                markerContent.style.fontSize = '32px';
-                markerContent.style.cursor = 'pointer';
-                markerContent.style.filter = 'drop-shadow(0 0 5px red)';
-                markerContent.innerHTML = monster.type === 'guardian' ? '👁️' : '👹';
-
-                const customMarker = new kakao.maps.CustomOverlay({
-                    position: pos,
-                    content: markerContent,
-                    map: map
-                });
-
-                // 마커 클릭 시 로드뷰 배틀 페이즈로 전환 진입
-                markerContent.onclick = () => enterBattlePhase(monster, index);
-            });
-        }
-
-        // 4. 로드뷰 전투 페이즈 진입 모드 (Projection 핵심 구현 영역)
-        function enterBattlePhase(monster, index) {
-            currentMonster = { ...monster, id: index };
-            const position = new kakao.maps.LatLng(monster.lat, monster.lng);
-
-            // 해당 좌표 주변 파노라마 ID 연동 탐색 수행
-            rvClient.getNearestPanoId(position, 50, function(panoId) {
-                if (panoId === null) {
-                    alert('전투용 지형(로드뷰) 데이터 확보에 실패했습니다. 다른 몬스터를 타겟팅해 주세요.');
+            rvClient.getNearestPanoId(targetPos, 60, function(panoId) {
+                if (!panoId) {
+                    alert('이 좌표 인근에는 몬스터가 숨을 수 있는 거리뷰 데이터가 없습니다. 다른 좌표를 타격하십시오.');
                     return;
                 }
-                
-                // 로드뷰 화면 동기화 매핑
-                rv.setPanoId(panoId, position);
-                document.getElementById('gameContainer').classList.add('battle-active');
-                
-                // 사이드바 HUD 교체
-                document.getElementById('resultList').style.display = 'none';
-                document.getElementById('battleHud').style.display = 'block';
-                updateBattleHud();
 
-                // [조건 4, 5] 로드뷰 좌표 투영 시스템 연동 및 오버레이 부착
+                // 로드뷰 로드
+                rv.setPanoId(panoId, targetPos);
+                document.getElementById('gameContainer').classList.add('battle-active');
+                document.getElementById('regionList').style.display = 'none';
+                document.getElementById('battleHud').style.display = 'block';
+                
+                document.getElementById('activeMonsterName').innerText = monster.name;
+                document.getElementById('monsterHp').style.width = '100%';
+
+                // [핵심 디버깅 해결책] 로드뷰 카메라 시점(POV)을 몬스터 좌표 방향으로 강제 회전 보장
                 setTimeout(() => {
-                    setupMonsterOverlayInRoadview(position);
-                }, 500);
+                    const projection = rv.getProjection();
+                    // 몬스터 좌표 기반으로 카메라가 바라볼 최적의 상하좌우 각도(POV)를 계산해냄
+                    const viewpoint = projection.viewpointFromCoords(targetPos);
+                    
+                    // 로드뷰 카메라 각도 전격 수정 조치
+                    rv.setViewpoint({
+                        pan: viewpoint.pan,
+                        tilt: viewpoint.tilt,
+                        zoom: 0
+                    });
+
+                    // 시점 일치가 끝난 후 로드뷰 내부에 몬스터 생성
+                    spawnMonsterInViewport(targetPos);
+                }, 600);
             });
         }
 
-        // 5. 로드뷰 전용 오버레이 매핑 알고리즘
-        function setupMonsterOverlayInRoadview(position) {
-            // 기존 오브젝트 청소 후 재생성
-            const existingOverlay = document.getElementById('roadviewMonster');
-            if (existingOverlay) existingOverlay.remove();
+        // 3. 로드뷰 뷰포트 내 몬스터 컴포넌트 부착
+        function spawnMonsterInViewport(position) {
+            const clean = document.getElementById('activeMonsterNode');
+            if (clean) clean.remove();
 
-            const container = document.createElement('div');
-            container.id = 'roadviewMonster';
-            container.className = 'monster-overlay';
+            const node = document.createElement('div');
+            node.id = 'activeMonsterNode';
+            node.className = 'monster-overlay';
 
-            // 이미지 소스 매핑 및 파라미터 장착
             const img = document.createElement('img');
-            // 로컬 파일명이 조건이므로 기획서의 파일명을 정확히 매칭합니다.
-            img.src = currentMonster.type === 'guardian' ? 'guardian.png' : 'bokoblin.png';
+            img.src = currentBattle.type === 'guardian' ? 'guardian.png' : 'bokoblin.png';
             img.className = 'monster-img';
             
-            // 이미지 깨짐 방지용 샘플 얼터너티브 아트 대체 로직 포함
+            // 이미지 예외 복구 안전장치
             img.onerror = () => {
                 img.style.display = 'none';
-                const textFallback = document.createElement('div');
-                textFallback.style.fontSize = '80px';
-                textFallback.innerHTML = currentMonster.type === 'guardian' ? '🐙[가디언]' : '🐷[보코블린]';
-                container.appendChild(textFallback);
+                const fallback = document.createElement('div');
+                fallback.style.cssText = 'font-size:70px; font-weight:bold; color:red; text-shadow:0 0 10px #000;';
+                fallback.innerText = currentBattle.type === 'guardian' ? '🐙[가디언]' : '🐷[보코블린]';
+                node.appendChild(fallback);
             };
 
-            container.appendChild(img);
+            node.appendChild(img);
 
-            // 로드뷰 프로젝션(특수 정사영 뷰포트 오버레이) 선언
-            const projectionOverlay = new kakao.maps.RoadviewCustomOverlay({
+            // 로드뷰 전용 입체 오버레이로 등록
+            new kakao.maps.RoadviewCustomOverlay({
                 position: position,
-                viewAnchor: new kakao.maps.RoadviewViewAnchor({ x: 0.5, y: 0.5 }), // 중앙 고정 정렬
-                content: container,
+                viewAnchor: new kakao.maps.RoadviewViewAnchor({ x: 0.5, y: 0.5 }),
+                content: node,
                 map: rv
             });
 
-            // [조건 6] 몬스터 신체 직접 타격(클릭) 이벤트 바인딩
-            container.onclick = (e) => executeAttack(e);
+            // 마우스 클릭 시 가격 데미지 작동
+            node.onclick = (e) => dealDamage(e);
         }
 
-        // 6. 전투 데미지 메커니즘 엔진
-        function executeAttack(e) {
-            if (!currentMonster || currentMonster.hp <= 0) return;
+        // 4. 리얼타임 타격 연출 알고리즘
+        function dealDamage(e) {
+            if (!currentBattle || currentBattle.hp <= 0) return;
 
-            // 20~45 랜덤 데미지
-            const dmg = Math.floor(Math.random() * (45 - 20 + 1)) + 20;
-            currentMonster.hp -= dmg;
-            if (currentMonster.hp < 0) currentMonster.hp = 0;
+            const dmg = Math.floor(Math.random() * 26) + 20; // 20~45 랜덤 타격
+            currentBattle.hp -= dmg;
+            if (currentBattle.hp < 0) currentBattle.hp = 0;
 
-            // HUD 동적 반영
-            updateBattleHpBar();
+            // 보스 바 스케일링
+            document.getElementById('monsterHp').style.width = `${(currentBattle.hp / currentBattle.maxHp) * 100}%`;
 
-            // 크리티컬 데미지 텍스트 인게임 공간 렌더링 배출
-            spawnDamageText(e.clientX, e.clientY, dmg);
+            // 크리티컬 데미지 수치 생성 팝업
+            const pop = document.createElement('div');
+            pop.className = 'damage-pop';
+            pop.innerText = `-${dmg}`;
+            pop.style.left = `${e.clientX}px`;
+            pop.style.top = `${e.clientY}px`;
+            document.body.appendChild(pop);
+            setTimeout(() => pop.remove(), 500);
 
-            // 사망 판정 체킹 체인 트리거
-            if (currentMonster.hp <= 0) {
-                setTimeout(processVictory, 600);
+            // 사망 플래그 확인
+            if (currentBattle.hp <= 0) {
+                setTimeout(triggerVictoryPhase, 500);
             }
         }
 
-        // 7. 시각 효과 제어기
-        function spawnDamageText(x, y, damage) {
-            const txt = document.createElement('div');
-            txt.className = 'damage-text';
-            txt.innerText = `-${damage}`;
-            txt.style.left = `${x}px`;
-            txt.style.top = `${y}px`;
-            document.body.appendChild(txt);
-
-            setTimeout(() => txt.remove(), 600);
-        }
-
-        function updateBattleHud() {
-            document.getElementById('targetName').innerText = currentMonster.name;
-            document.getElementById('targetInfo').innerText = `PM2.5: ${currentMonster.dust}㎍/㎥ (${currentMonster.region})`;
-            updateBattleHpBar();
-        }
-
-        function updateBattleHpBar() {
-            const prcnt = (currentMonster.hp / currentMonster.maxHp) * 100;
-            document.getElementById('hpBar').style.width = `${prcnt}%`;
-        }
-
-        // 8. 보상 처리 및 지리 정보 모달 관리
-        function processVictory() {
-            userRupees += currentMonster.reward;
-            document.getElementById('rupeeCount').innerText = userRupees;
-
-            // 전투 종료 후 레이아웃 백 트래킹
-            exitBattleMode();
-
-            // [조건 9] 지리 정보 카드 해금 오픈
-            openCardModal();
-        }
-
-        function openCardModal() {
-            document.getElementById('cardHeader').innerText = `📍 지리 카드: ${currentMonster.region}`;
-            document.getElementById('cardBody').innerHTML = `
-                <p><strong>위험 개체:</strong> ${currentMonster.name}</p>
-                <p><strong>오염 지수 (PM2.5):</strong> <span style="color:#ff003c;font-weight:bold;">${currentMonster.dust} ㎍/㎥</span></p>
-                <hr style="border-color:rgba(0,229,255,0.2); margin:10px 0;">
-                <p>${currentMonster.info}</p>
-                <hr style="border-color:rgba(0,229,255,0.2); margin:10px 0;">
-                <p style="color:#39ff14; font-weight:bold; text-align:center;">🔷 +${currentMonster.reward} RUPEES 획득 완료!</p>
+        // 5. 처치 완료 및 [실제 지리 정보] 추출 파싱 엔진
+        function triggerVictoryPhase() {
+            // 보상 카드 주입
+            document.getElementById('modalRegionName').innerText = `📍 지리 획득: ${currentBattle.placeName}`;
+            document.getElementById('modalRegionText').innerHTML = `
+                <p><strong>수집 구역 명칭:</strong> ${currentBattle.placeName}</p>
+                <p><strong>해당 구역 주소:</strong> ${currentBattle.address}</p>
+                <hr style="border-color:rgba(0,229,255,0.2); margin:12px 0;">
+                <p style="font-size:13px; color:#aaa;">이 구역의 조사를 완료하여 하이랄 왕국의 지리 도감에 기록되었습니다. 해당 지역은 위도 ${currentBattle.lat}, 경도 ${currentBattle.lng} 지점에 명확히 안착되어 있습니다.</p>
+                <hr style="border-color:rgba(0,229,255,0.2); margin:12px 0;">
+                <p style="color:#39ff14; font-weight:bold; text-align:center;">🔷 보상: +${currentBattle.reward} RUPEES</p>
             `;
-            const m = document.getElementById('cardModal');
-            m.style.display = 'flex';
-            setTimeout(() => m.classList.add('open'), 50);
+
+            // 모달 오픈 활성화
+            const modal = document.getElementById('rewardModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 50);
+
+            // 필드 백그라운드 원복 복구
+            escapeBattle();
         }
 
-        function closeCardModal() {
-            const m = document.getElementById('cardModal');
-            m.classList.remove('open');
-            setTimeout(() => m.style.display = 'none', 400);
-        }
-
-        function exitBattleMode() {
-            currentMonster = null;
-            document.getElementById('gameContainer').classList.remove('battle-active');
-            document.getElementById('resultList').style.display = 'block';
-            document.getElementById('battleHud').style.display = 'none';
+        function claimRewards() {
+            totalRupees += currentBattle.reward;
+            document.getElementById('totalRupees').innerText = totalRupees;
             
-            const mo = document.getElementById('roadviewMonster');
-            if (mo) mo.remove();
+            const modal = document.getElementById('rewardModal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function escapeBattle() {
+            currentBattle = null;
+            document.getElementById('gameContainer').classList.remove('battle-active');
+            document.getElementById('regionList').style.display = 'block';
+            document.getElementById('battleHud').style.display = 'none';
+            const node = document.getElementById('activeMonsterNode');
+            if (node) node.remove();
         }
     </script>
 </body>

@@ -122,7 +122,7 @@
         }
         .search-box button:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* 지역 리스트 */
+        /* 미답사 지역 리스트 */
         .result-list {
             flex: 1;
             overflow-y: auto;
@@ -143,7 +143,7 @@
             transform: translateX(4px);
         }
 
-        /* ⚔️ 보스 체력바 및 전투 패널 */
+        /* ⚔️ 보스전 배틀 패널 및 하트 체력바 */
         .battle-hud {
             display: none;
             background: rgba(255, 0, 60, 0.03);
@@ -164,8 +164,8 @@
         }
         .monster-name-tag { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 8px; text-align: center;}
         
-        /* 젤다 스타일 하트/에너지 보스 피통 */
-        .hp-outer { width: 100%; height: 14px; background: #1a0005; border: 1px solid #ff003c; border-radius: 7px; overflow: hidden; }
+        /* 젤다 스타일 보스 체력바 */
+        .hp-outer { width: 100%; height: 16px; background: #1a0005; border: 1px solid #ff003c; border-radius: 8px; overflow: hidden; }
         .hp-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #ff003c 0%, #ff6b8b 100%); transition: width 0.15s ease; }
         
         .btn-escape {
@@ -174,18 +174,17 @@
         }
         .btn-escape:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        /* 4. 로드뷰 내 크리티컬 히트 존 (몬스터 오버레이) */
+        /* 4. 로드뷰 내 오버레이 인터페이스 */
         .monster-overlay {
-            position: absolute;
-            width: 300px;
-            height: 300px;
+            width: 260px;
+            height: 260px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
         }
         .monster-img {
-            width: 250px;
+            width: 100%;
             height: auto;
             filter: drop-shadow(0 15px 10px rgba(0,0,0,0.8));
             animation: floatGlow 2.5s ease-in-out infinite;
@@ -193,19 +192,19 @@
         }
         .monster-img:active { transform: scale(0.9); }
 
-        /* 💥 데미지 팝업 이펙트 */
+        /* 💥 타격 데미지 팝업 이펙트 */
         .damage-pop {
-            position: absolute;
-            font-size: 42px;
+            position: fixed;
+            font-size: 45px;
             font-weight: 900;
             color: #ffeb3b;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 10px red;
             animation: popUp 0.5s ease-out forwards;
             pointer-events: none;
-            z-index: 9999;
+            z-index: 99999;
         }
 
-        /* 5. 지리 정보 고대 카드 모달 */
+        /* 5. 고대 지리 정보 도감 카드 모달 */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center;
@@ -221,15 +220,15 @@
         .card-info { background: rgba(255,255,255,0.02); border: 1px solid rgba(0,229,255,0.2); padding: 15px; border-radius: 4px; text-align: left; line-height: 1.6; margin-bottom: 20px;}
         .btn-claim { width: 100%; padding: 12px; background: #39ff14; color: #000; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;}
 
-        /* 키프레임 애니메이션 */
+        /* 애니메이션 설정 */
         @keyframes floatGlow {
             0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-12px) scale(1.03); }
+            50% { transform: translateY(-12px) scale(1.02); }
             100% { transform: translateY(0) scale(1); }
         }
         @keyframes popUp {
             0% { opacity: 1; transform: translateY(0) scale(0.6); }
-            100% { opacity: 0; transform: translateY(-70px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
         }
         @keyframes pulse {
             0% { opacity: 0.4; text-shadow: 0 0 2px red; }
@@ -258,16 +257,16 @@
             </div>
 
             <div class="search-box">
-                <input type="text" id="targetKeyword" placeholder="조사할 지명 입력 (예: 해운대)">
+                <input type="text" id="targetKeyword" placeholder="미답사 지명 입력 (예: 해운대)">
                 <button onclick="searchNewRegion()">조사</button>
             </div>
 
             <ul id="regionList" class="result-list">
-                <li style="color:#666; text-align:center; padding-top:30px;">지역을 검색하여 몬스터를 스캔하세요.</li>
+                <li style="color:#666; text-align:center; padding-top:30px;">지명을 검색하여 점거 중인 몬스터를 스캔하세요.</li>
             </ul>
 
             <div id="battleHud" class="battle-hud">
-                <div class="danger-ui danger-title">⚔️ ENEMY ENCOUNTERED ⚔️</div>
+                <div class="danger-title">⚔️ BATTLE PHASE ⚔️</div>
                 <div id="activeMonsterName" class="monster-name-tag">-</div>
                 <div class="hp-outer">
                     <div id="monsterHp" class="hp-inner"></div>
@@ -284,9 +283,9 @@
 
     <div id="rewardModal" class="modal">
         <div class="ancient-card">
-            <div id="modalRegionName" class="card-title">📍 서울 종로구</div>
-            <div id="modalRegionText" class="card-info">지리 정보 로딩 실패</div>
-            <button class="btn-claim" onclick="claimRewards()">루피 및 도감 획득</button>
+            <div id="modalRegionName" class="card-title">📍 지도 정보 해금</div>
+            <div id="modalRegionText" class="card-info">지리 데이터 복원 중...</div>
+            <button class="btn-claim" onclick="claimRewards()">지도 데이터 동기화</button>
         </div>
     </div>
 
@@ -296,8 +295,9 @@
         let currentBattle = null;
         let totalRupees = 0;
         let currentMarkers = [];
+        let rvCustomOverlay = null;
 
-        // 시스템 기동 및 보호 로드
+        // 시스템 기동 및 초기화
         kakao.maps.load(function() {
             map = new kakao.maps.Map(document.getElementById('map'), {
                 center: new kakao.maps.LatLng(37.566826, 126.9786567),
@@ -308,7 +308,7 @@
             rv = new kakao.maps.Roadview(document.getElementById('roadview'));
             rvClient = new kakao.maps.RoadviewClient();
 
-            // 최초 GPS 수신 동기화
+            // 현재 GPS 위치 연동
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(pos) {
                     map.setCenter(new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude));
@@ -316,7 +316,7 @@
             }
         });
 
-        // 1. [핵심 변경] 모든 검색 지역에 100% 몬스터 실시간 매핑 알고리즘
+        // 1. 전국 지명 검색을 통한 몬스터 현황 스캔
         function searchNewRegion() {
             const kw = document.getElementById('targetKeyword').value;
             if (!kw.trim()) return;
@@ -325,7 +325,7 @@
                 if (status === kakao.maps.services.Status.OK) {
                     generateRegionMonsters(data);
                 } else {
-                    alert('해당 지형은 스캔할 수 없습니다.');
+                    alert('하이랄 지도에 존재하지 않는 지형 이름입니다.');
                 }
             });
         }
@@ -334,7 +334,7 @@
             const list = document.getElementById('regionList');
             const bounds = new kakao.maps.LatLngBounds();
             
-            // 기존 마커 전체 클리어
+            // 기존 맵 마커 청소
             currentMarkers.forEach(m => m.setMap(null));
             currentMarkers = [];
             list.innerHTML = '';
@@ -343,7 +343,6 @@
                 const pos = new kakao.maps.LatLng(place.y, place.x);
                 bounds.extend(pos);
 
-                // 보코블린 / 가디언 무작위 매칭 엔진
                 const isBoss = idx % 3 === 0; 
                 const monster = {
                     name: isBoss ? "고대 가디언" : "야생 보코블린",
@@ -357,7 +356,7 @@
                     lng: place.x
                 };
 
-                // 지도에 젤다 고유 아이콘 핀 배치
+                // 지도 상에 적 개체 표시 (커스텀 오버레이)
                 const markerEl = document.createElement('div');
                 markerEl.style.cssText = 'font-size:32px; cursor:pointer; filter:drop-shadow(0 0 6px red);';
                 markerEl.innerHTML = isBoss ? '👁️' : '👹';
@@ -369,12 +368,11 @@
                 });
                 currentMarkers.push(overlay);
 
-                // 사이드바 목록 노드 생성
+                // 사이드바 리스트 등록
                 const li = document.createElement('li');
                 li.className = 'result-item';
-                li.innerHTML = `<strong>${monster.name} 출현</strong><br><span style="font-size:11px;color:#00e5ff;">📍 ${place.place_name}</span>`;
+                li.innerHTML = `<strong>${monster.name} 발견</strong><br><span style="font-size:11px;color:#00e5ff;">📍 ${place.place_name}</span>`;
                 
-                // 마커 및 리스트 클릭 연동 -> 로드뷰 격투 돌입
                 const startAction = () => initBattleMode(monster);
                 markerEl.onclick = startAction;
                 li.onclick = startAction;
@@ -385,93 +383,88 @@
             map.setBounds(bounds);
         }
 
-        // 2. [완벽 해결] 로드뷰 내부 방향 정렬(POV) 매커니즘 장착 보스전 진입
+        // 2. 카카오 공식 문서 규격 - 로드뷰 배틀 맵 로딩 및 시점 추영
         function initBattleMode(monster) {
             currentBattle = monster;
             const targetPos = new kakao.maps.LatLng(monster.lat, monster.lng);
 
             rvClient.getNearestPanoId(targetPos, 60, function(panoId) {
                 if (!panoId) {
-                    alert('이 좌표 인근에는 몬스터가 숨을 수 있는 거리뷰 데이터가 없습니다. 다른 좌표를 타격하십시오.');
+                    alert('이 위치는 지형 정보 파노라마를 로드할 수 없습니다. 근처의 다른 구역을 선택하세요.');
                     return;
                 }
 
-                // 로드뷰 로드
+                // 잔여 메모리 및 리스너 클리어
+                if (rvCustomOverlay) {
+                    rvCustomOverlay.setMap(null);
+                    rvCustomOverlay = null;
+                }
+                kakao.maps.event.removeListener(rv, 'init');
+
+                // 파노라마 아이디 매핑
                 rv.setPanoId(panoId, targetPos);
+
+                // 카카오 로드뷰 이니셜라이즈드 훅 수신
+                kakao.maps.event.addListener(rv, 'init', function() {
+                    
+                    // 몬스터 DOM 노드 생성
+                    const node = document.createElement('div');
+                    node.className = 'monster-overlay';
+
+                    const img = document.createElement('img');
+                    img.src = currentBattle.type === 'guardian' ? 'guardian.png' : 'bokoblin.png';
+                    img.className = 'monster-img';
+                    
+                    // 이미지 미소환 대응 대체 텍스트
+                    img.onerror = () => {
+                        img.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.style.cssText = 'font-size:60px; font-weight:bold; color:#ff003c; text-shadow:0 0 10px #000;';
+                        fallback.innerText = currentBattle.type === 'guardian' ? '🐙[가디언]' : '🐷[보코블린]';
+                        node.appendChild(fallback);
+                    };
+
+                    node.appendChild(img);
+
+                    // 카카오 맵 정석 CustomOverlay로 로드뷰 위에 빌드
+                    rvCustomOverlay = new kakao.maps.CustomOverlay({
+                        position: targetPos,
+                        content: node,
+                        xAnchor: 0.5,
+                        yAnchor: 0.5
+                    });
+                    rvCustomOverlay.setMap(rv);
+
+                    // 공식 앵글 포인터 투영 수식 동기화 (화면 정중앙 정렬)
+                    const projection = rv.getProjection();
+                    const viewpoint = projection.viewpointFromCoords(rvCustomOverlay.getPosition(), 0);
+                    rv.setViewpoint(viewpoint);
+
+                    // 신체 직접 가격 이벤트
+                    node.onclick = (e) => dealDamage(e);
+                });
+
+                // HUD 인터페이스 전환 가동
                 document.getElementById('gameContainer').classList.add('battle-active');
                 document.getElementById('regionList').style.display = 'none';
                 document.getElementById('battleHud').style.display = 'block';
                 
                 document.getElementById('activeMonsterName').innerText = monster.name;
                 document.getElementById('monsterHp').style.width = '100%';
-
-                // [핵심 디버깅 해결책] 로드뷰 카메라 시점(POV)을 몬스터 좌표 방향으로 강제 회전 보장
-                setTimeout(() => {
-                    const projection = rv.getProjection();
-                    // 몬스터 좌표 기반으로 카메라가 바라볼 최적의 상하좌우 각도(POV)를 계산해냄
-                    const viewpoint = projection.viewpointFromCoords(targetPos);
-                    
-                    // 로드뷰 카메라 각도 전격 수정 조치
-                    rv.setViewpoint({
-                        pan: viewpoint.pan,
-                        tilt: viewpoint.tilt,
-                        zoom: 0
-                    });
-
-                    // 시점 일치가 끝난 후 로드뷰 내부에 몬스터 생성
-                    spawnMonsterInViewport(targetPos);
-                }, 600);
             });
         }
 
-        // 3. 로드뷰 뷰포트 내 몬스터 컴포넌트 부착
-        function spawnMonsterInViewport(position) {
-            const clean = document.getElementById('activeMonsterNode');
-            if (clean) clean.remove();
-
-            const node = document.createElement('div');
-            node.id = 'activeMonsterNode';
-            node.className = 'monster-overlay';
-
-            const img = document.createElement('img');
-            img.src = currentBattle.type === 'guardian' ? 'guardian.png' : 'bokoblin.png';
-            img.className = 'monster-img';
-            
-            // 이미지 예외 복구 안전장치
-            img.onerror = () => {
-                img.style.display = 'none';
-                const fallback = document.createElement('div');
-                fallback.style.cssText = 'font-size:70px; font-weight:bold; color:red; text-shadow:0 0 10px #000;';
-                fallback.innerText = currentBattle.type === 'guardian' ? '🐙[가디언]' : '🐷[보코블린]';
-                node.appendChild(fallback);
-            };
-
-            node.appendChild(img);
-
-            // 로드뷰 전용 입체 오버레이로 등록
-            new kakao.maps.RoadviewCustomOverlay({
-                position: position,
-                viewAnchor: new kakao.maps.RoadviewViewAnchor({ x: 0.5, y: 0.5 }),
-                content: node,
-                map: rv
-            });
-
-            // 마우스 클릭 시 가격 데미지 작동
-            node.onclick = (e) => dealDamage(e);
-        }
-
-        // 4. 리얼타임 타격 연출 알고리즘
+        // 3. 타격 데미지 엔진 및 이펙트 연출
         function dealDamage(e) {
             if (!currentBattle || currentBattle.hp <= 0) return;
 
-            const dmg = Math.floor(Math.random() * 26) + 20; // 20~45 랜덤 타격
+            const dmg = Math.floor(Math.random() * 26) + 20; // 20~45 랜덤
             currentBattle.hp -= dmg;
             if (currentBattle.hp < 0) currentBattle.hp = 0;
 
-            // 보스 바 스케일링
             document.getElementById('monsterHp').style.width = `${(currentBattle.hp / currentBattle.maxHp) * 100}%`;
 
-            // 크리티컬 데미지 수치 생성 팝업
+            // 클릭 좌표에 검기(데미지 숫자) 팝업 발생
             const pop = document.createElement('div');
             pop.className = 'damage-pop';
             pop.innerText = `-${dmg}`;
@@ -480,31 +473,28 @@
             document.body.appendChild(pop);
             setTimeout(() => pop.remove(), 500);
 
-            // 사망 플래그 확인
+            // 처치 완료 시 지리 도감 해금
             if (currentBattle.hp <= 0) {
                 setTimeout(triggerVictoryPhase, 500);
             }
         }
 
-        // 5. 처치 완료 및 [실제 지리 정보] 추출 파싱 엔진
+        // 4. 전리품 획득 및 고대 지리 도감 카드 개방
         function triggerVictoryPhase() {
-            // 보상 카드 주입
-            document.getElementById('modalRegionName').innerText = `📍 지리 획득: ${currentBattle.placeName}`;
+            document.getElementById('modalRegionName').innerText = `🗺️ 월드맵 데이터 복원 성공`;
             document.getElementById('modalRegionText').innerHTML = `
-                <p><strong>수집 구역 명칭:</strong> ${currentBattle.placeName}</p>
-                <p><strong>해당 구역 주소:</strong> ${currentBattle.address}</p>
+                <p style="color:#00e5ff; font-weight:bold; font-size:16px; margin-bottom:10px;">🗺️ 해금된 지역명: ${currentBattle.placeName}</p>
+                <p><strong>상세 행정 좌표 주소:</strong> ${currentBattle.address}</p>
                 <hr style="border-color:rgba(0,229,255,0.2); margin:12px 0;">
-                <p style="font-size:13px; color:#aaa;">이 구역의 조사를 완료하여 하이랄 왕국의 지리 도감에 기록되었습니다. 해당 지역은 위도 ${currentBattle.lat}, 경도 ${currentBattle.lng} 지점에 명확히 안착되어 있습니다.</p>
+                <p style="font-size:13.5px; color:#aaa; line-height:1.5;">성공적으로 오염 개체를 몰아내어 하이랄 왕국의 잃어버린 월드맵 일부를 성공적으로 수집했습니다. 해당 지형의 절대 좌표 [위도 ${currentBattle.lat} / 경도 ${currentBattle.lng}] 정보가 도감에 기록되었습니다.</p>
                 <hr style="border-color:rgba(0,229,255,0.2); margin:12px 0;">
-                <p style="color:#39ff14; font-weight:bold; text-align:center;">🔷 보상: +${currentBattle.reward} RUPEES</p>
+                <p style="color:#39ff14; font-weight:bold; text-align:center; font-size:16px;">🔷 전리품 보상: +${currentBattle.reward} RUPEES</p>
             `;
 
-            // 모달 오픈 활성화
             const modal = document.getElementById('rewardModal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 50);
 
-            // 필드 백그라운드 원복 복구
             escapeBattle();
         }
 
@@ -522,8 +512,11 @@
             document.getElementById('gameContainer').classList.remove('battle-active');
             document.getElementById('regionList').style.display = 'block';
             document.getElementById('battleHud').style.display = 'none';
-            const node = document.getElementById('activeMonsterNode');
-            if (node) node.remove();
+            
+            if (rvCustomOverlay) {
+                rvCustomOverlay.setMap(null);
+                rvCustomOverlay = null;
+            }
         }
     </script>
 </body>

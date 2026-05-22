@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE LEGEND OF GEOGRAPHY - VIEWPOINT EDITION</title>
+    <title>THE LEGEND OF GEOGRAPHY - BOSS IF EDITION</title>
     <style>
-        /* 젤다의 전설 테마 인터페이스 리셋 */
         * {
             margin: 0;
             padding: 0;
@@ -59,6 +58,10 @@
         .battle-active .map-area { z-index: 1; opacity: 0; }
         .battle-active .roadview-area { z-index: 2; opacity: 1; }
 
+        .shake {
+            animation: screenShake 0.15s linear infinite;
+        }
+
         .game-header {
             border-bottom: 2px solid #00e5ff;
             padding-bottom: 12px;
@@ -78,7 +81,6 @@
             margin-top: 5px;
         }
 
-        /* 🔷 무한 누적 루피 HUD */
         .rupee-hud {
             display: flex;
             align-items: center;
@@ -95,7 +97,6 @@
         }
         .rupee-icon { margin-right: 10px; }
 
-        /* 지역 검색창 */
         .search-box {
             display: flex;
             gap: 6px;
@@ -120,7 +121,6 @@
         }
         .search-box button:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* 스캔 리스트 */
         .result-list {
             flex: 1;
             overflow-y: auto;
@@ -141,59 +141,135 @@
             transform: translateX(4px);
         }
 
-        /* ⚔️ 실시간 하트 보스바 체력 패널 */
-        .battle-hud {
+        /* 👑 [전면 교체] 상단 거대 젤다 보스전 UI 패널 */
+        .zelda-boss-panel {
             display: none;
-            background: rgba(255, 0, 60, 0.03);
-            border: 1px solid #ff003c;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: auto;
-            box-shadow: 0 0 15px rgba(255,0,60,0.1);
-        }
-        .danger-title {
-            color: #ff003c;
-            font-weight: bold;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 700px;
+            z-index: 999;
             text-align: center;
-            font-size: 13px;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-            animation: pulse 1s infinite alternate;
+            pointer-events: none; /* 뒷배경 클릭 방해 금지 */
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.9));
         }
-        .monster-name-tag { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 8px; text-align: center;}
-        
-        .hp-outer { width: 100%; height: 16px; background: #1a0005; border: 1px solid #ff003c; border-radius: 8px; overflow: hidden; }
-        .hp-inner { width: 100%; height: 100%; background: linear-gradient(90deg, #ff003c 0%, #ff6b8b 100%); transition: width 0.1s ease; }
-        
-        .btn-escape {
-            width: 100%; margin-top: 15px; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.4);
-            color: #ccc; cursor: pointer; border-radius: 4px;
+        .battle-active .zelda-boss-panel {
+            display: block;
+            animation: bossFadeIn 0.8s ease-out forwards;
         }
-        .btn-escape:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-        /* 로드뷰 몬스터 이미지 스타일 (카카오 가이드 방식 스타일 적용) */
+        .boss-name-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 6px;
+        }
+        .boss-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,0,60,0) 0%, rgba(255,0,60,0.8) 50%, rgba(255,0,60,0) 100%);
+        }
+        .boss-title-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff3b5c;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(255,0,60,0.7), 2px 2px 2px #000;
+            font-family: 'Georgia', serif;
+        }
+
+        .boss-hp-frame {
+            width: 100%;
+            height: 10px;
+            background: rgba(40, 0, 10, 0.7);
+            border: 1px solid rgba(255, 59, 92, 0.6);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        .boss-hp-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #99001c 0%, #ff1744 50%, #ff617f 100%);
+            box-shadow: 0 0 12px #ff1744;
+            transition: width 0.2s cubic-bezier(0.1, 0.8, 0.1, 1);
+        }
+        .boss-hp-text {
+            color: rgba(255,255,255,0.8);
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            text-shadow: 1px 1px 2px #000;
+            text-align: right;
+        }
+
+        /* 하단 서브 도망치기 패널 */
+        .escape-panel {
+            display: none;
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            z-index: 999;
+        }
+        .battle-active .escape-panel { display: block; }
+        .btn-escape-action {
+            padding: 10px 24px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #ccc;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-escape-action:hover { background: #ff003c; border-color: #ff003c; color: #fff; box-shadow: 0 0 10px red; }
+
+        /* 👾 몬스터 오버레이 및 피격 리액션 */
         .monster-img-overlay {
-            width: 280px;
+            width: 300px;
             height: auto;
             cursor: pointer;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.9));
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.9));
             animation: floatGlow 2.5s ease-in-out infinite;
-            transition: transform 0.05s;
+            transition: filter 0.05s, transform 0.05s;
         }
-        .monster-img-overlay:active {
-            transform: scale(0.95);
+        .monster-hit {
+            filter: drop-shadow(0 0 25px red) invert(15%) sepia(95%) saturate(7400%) hue-rotate(355deg) brightness(90%) contrast(120%) !important;
+            transform: scale(0.85) cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 💥 크리티컬 데미지 팝업 */
+        /* ⚔️ 검기 궤적 이펙트 스타일 */
+        .slash-effect {
+            position: fixed;
+            width: 180px;
+            height: 30px;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 50%, rgba(0,229,255,0) 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99998;
+            transform-origin: center;
+            animation: slashAnim 0.25s ease-out forwards;
+        }
+
+        /* 💥 대형 데미지 팝업 */
         .damage-pop {
             position: fixed;
             font-size: 45px;
             font-weight: 900;
             color: #ffeb3b;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 10px red;
-            animation: popUp 0.4s ease-out forwards;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 15px red;
+            animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             pointer-events: none;
             z-index: 99999;
+        }
+        .damage-pop.critical {
+            font-size: 65px;
+            color: #ff3d00;
+            text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 0 25px #ffeb3b;
+            animation: popUpCritical 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards;
         }
 
         /* 고대 지리 정보 도감 카드 모달 */
@@ -212,24 +288,46 @@
         .card-info { background: rgba(255,255,255,0.02); border: 1px solid rgba(0,229,255,0.2); padding: 15px; border-radius: 4px; text-align: left; line-height: 1.6; margin-bottom: 20px;}
         .btn-claim { width: 100%; padding: 12px; background: #39ff14; color: #000; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; font-size: 15px;}
 
+        /* 애니메이션 구현부 */
+        @keyframes bossFadeIn {
+            0% { opacity: 0; transform: translate(-50%, -20px); }
+            100% { opacity: 1; transform: translate(-50%, 0); }
+        }
+        @keyframes screenShake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        @keyframes slashAnim {
+            0% { transform: scaleX(0) rotate(var(--angle)) translateY(0); opacity: 1; }
+            50% { transform: scaleX(1.2) rotate(var(--angle)) translateY(-10px); opacity: 1; }
+            100% { transform: scaleX(1.5) rotate(var(--angle)) translateY(-20px); opacity: 0; }
+        }
         @keyframes floatGlow {
             0% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0); }
         }
         @keyframes popUp {
-            0% { opacity: 1; transform: translateY(0) scale(0.7); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+            0% { opacity: 1; transform: translateY(0) scale(0.6); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.2); }
         }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
+        @keyframes popUpCritical {
+            0% { opacity: 1; transform: translateY(0) scale(0.5) rotate(-15deg); }
+            50% { transform: translateY(-50px) scale(1.3) rotate(10deg); }
+            100% { opacity: 0; transform: translateY(-130px) scale(1.0) rotate(0deg); }
         }
 
         @media (max-width: 768px) {
             .container { flex-direction: column-reverse; }
             .sidebar { width: 100%; height: 45%; border-right: none; border-top: 4px double #00e5ff; }
             .main-content { flex: 1; height: 55%; }
+            .zelda-boss-panel { top: 15px; width: 90%; }
+            .boss-title-text { font-size: 18px; }
         }
     </style>
 </head>
@@ -255,18 +353,25 @@
             <ul id="regionList" class="result-list">
                 <li style="color:#666; text-align:center; padding-top:30px;">지역을 검색하여 몬스터를 파밍하세요.</li>
             </ul>
-
-            <div id="battleHud" class="battle-hud">
-                <div class="danger-title">⚔️ BATTLE PHASE ⚔️</div>
-                <div id="activeMonsterName" class="monster-name-tag">-</div>
-                <div class="hp-outer">
-                    <div id="monsterHp" class="hp-inner"></div>
-                </div>
-                <button class="btn-escape" onclick="escapeBattle()">전투 도망치기</button>
-            </div>
         </div>
 
-        <div class="main-content">
+        <div class="main-content" id="mainContent">
+            <div class="zelda-boss-panel">
+                <div class="boss-name-area">
+                    <div class="boss-line"></div>
+                    <div id="bossNameText" class="boss-title-text">전투 오염 개체</div>
+                    <div class="boss-line"></div>
+                </div>
+                <div class="boss-hp-frame">
+                    <div id="bossHpBar" class="boss-hp-bar"></div>
+                </div>
+                <div id="bossHpText" class="boss-hp-text">HP 100 / 100</div>
+            </div>
+
+            <div class="escape-panel">
+                <button class="btn-escape-action" onclick="escapeBattle()">전투 무르기 (런)</button>
+            </div>
+
             <div id="map" class="map-area"></div>
             <div id="roadview" class="roadview-area"></div>
         </div>
@@ -370,7 +475,6 @@
             map.setBounds(bounds);
         }
 
-        // 2. [가져온 새 가이드 적용] Viewpoint 좌표 방식으로 몬스터 강제 고정
         function initBattleMode(monster) {
             currentBattle = JSON.parse(JSON.stringify(monster)); 
             const targetPos = new kakao.maps.LatLng(monster.lat, monster.lng);
@@ -387,71 +491,91 @@
                 }
                 kakao.maps.event.removeListener(rv, 'init');
 
-                // 로드뷰 카메라 시점 고정 각도 설정 (정면 바라보기)
                 rv.setPanoId(panoId, targetPos);
 
-                // 로드뷰 이니셜라이즈드 훅 이벤트 발생 시 실행
                 kakao.maps.event.addListener(rv, 'init', function() {
                     
-                    // 네가 찾은 가이드방식대로 순수 <img> 엘리먼트 생성
                     const img = document.createElement('img');
                     img.src = currentBattle.type === 'guardian' ? 'guardian.png' : 'bokoblin.png';
                     img.className = 'monster-img-overlay';
+                    img.id = 'activeMonsterImg';
                     
-                    // 이미지 실종 시 텍스트 백업 장치
                     img.onerror = () => {
                         img.style.display = 'none';
                         const fallback = document.createElement('div');
-                        fallback.style.cssText = 'font-size:55px; font-weight:bold; color:#ff003c; text-shadow:0 0 10px #000; cursor:pointer;';
+                        fallback.id = 'activeMonsterImg';
+                        fallback.style.cssText = 'font-size:55px; font-weight:bold; color:#ff003c; text-shadow:0 0 10px #000; cursor:pointer; transition: transform 0.05s;';
                         fallback.innerText = currentBattle.type === 'guardian' ? '🐙[고대 가디언]' : '🐷[야생 보코블린]';
                         fallback.onclick = (e) => dealDamage(e);
                         
-                        // 텍스트 오버레이 재생성
                         new kakao.maps.CustomOverlay({
                             map: rv,
-                            position: new kakao.maps.Viewpoint(300, -5, 3), // 정면 뷰포트 고정
+                            position: new kakao.maps.Viewpoint(300, -5, 3),
                             content: fallback
                         });
                     };
 
-                    // 타격 함수 연결
                     img.onclick = (e) => dealDamage(e);
 
-                    // [핵심 변경] 카메라 시점(Viewpoint) 자체를 강제 고정하고, 그 위에 이미지 오버레이 매핑
                     rv.setViewpoint(new kakao.maps.Viewpoint(300, -7, 3));
 
                     rvCustomOverlay = new kakao.maps.CustomOverlay({
                         map: rv,
-                        position: new kakao.maps.Viewpoint(299.7, -7.6), // 새 가이드 규격 정밀 안착
+                        position: new kakao.maps.Viewpoint(299.7, -7.6),
                         content: img
                     });
                 });
 
                 document.getElementById('gameContainer').classList.add('battle-active');
                 document.getElementById('regionList').style.display = 'none';
-                document.getElementById('battleHud').style.display = 'block';
                 
-                document.getElementById('activeMonsterName').innerText = monster.name;
-                document.getElementById('monsterHp').style.width = '100%';
+                // 👑 대형 상단 패널 갱신
+                document.getElementById('bossNameText').innerText = monster.name;
+                document.getElementById('bossHpBar').style.width = '100%';
+                document.getElementById('bossHpText').innerText = `HP ${monster.hp} / ${monster.maxHp}`;
             });
         }
 
         function dealDamage(e) {
             if (!currentBattle || currentBattle.hp <= 0) return;
 
-            const dmg = Math.floor(Math.random() * 26) + 20; 
+            const isCritical = Math.random() < 0.15;
+            let dmg = Math.floor(Math.random() * 21) + 20; 
+            if (isCritical) dmg = Math.floor(dmg * 2.0);  
+
             currentBattle.hp -= dmg;
             if (currentBattle.hp < 0) currentBattle.hp = 0;
 
-            document.getElementById('monsterHp').style.width = `${(currentBattle.hp / currentBattle.maxHp) * 100}%`;
+            // 👑 상단 대형 체력 게이지 스케일 동기화
+            document.getElementById('bossHpBar').style.width = `${(currentBattle.hp / currentBattle.maxHp) * 100}%`;
+            document.getElementById('bossHpText').innerText = `HP ${currentBattle.hp} / ${currentBattle.maxHp}`;
+
+            const monsterImg = document.getElementById('activeMonsterImg');
+            if (monsterImg) {
+                monsterImg.classList.add('monster-hit');
+                setTimeout(() => monsterImg.classList.remove('monster-hit'), 80);
+            }
+
+            const slash = document.createElement('div');
+            slash.className = 'slash-effect';
+            slash.style.left = `${e.clientX - 90}px`;
+            slash.style.top = `${e.clientY - 15}px`;
+            const randomAngle = Math.floor(Math.random() * 120) - 60; 
+            slash.style.setProperty('--angle', `${randomAngle}deg`);
+            document.body.appendChild(slash);
+            setTimeout(() => slash.remove(), 250);
 
             const pop = document.createElement('div');
-            pop.className = 'damage-pop';
-            pop.innerText = `-${dmg}`;
-            pop.style.left = `${e.clientX}px`;
-            pop.style.top = `${e.clientY}px`;
+            pop.className = `damage-pop ${isCritical ? 'critical' : ''}`;
+            pop.innerText = isCritical ? `💥 CRITICAL! -${dmg}` : `-${dmg}`;
+            pop.style.left = `${e.clientX - 30}px`;
+            pop.style.top = `${e.clientY - 40}px`;
             document.body.appendChild(pop);
-            setTimeout(() => pop.remove(), 400);
+            setTimeout(() => pop.remove(), 450);
+
+            const rvField = document.getElementById('mainContent');
+            rvField.classList.add('shake');
+            setTimeout(() => rvField.classList.remove('shake'), isCritical ? 250 : 120);
 
             if (currentBattle.hp <= 0) {
                 setTimeout(triggerVictoryPhase, 400);
@@ -495,7 +619,6 @@
             currentBattle = null;
             document.getElementById('gameContainer').classList.remove('battle-active');
             document.getElementById('regionList').style.display = 'block';
-            document.getElementById('battleHud').style.display = 'none';
             
             if (rvCustomOverlay) {
                 rvCustomOverlay.setMap(null);
